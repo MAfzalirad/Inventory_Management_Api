@@ -6,8 +6,7 @@ from logging.config import fileConfig
 
 from app.env_utils import get_required_env
 
-from app.database import Base
-import app.models
+from app.db_base import Base
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
