@@ -50,9 +50,21 @@ user_dependency = Annotated[dict, Depends(get_current_user)]
 
 
 def require_role(*roles):
+    """Build a FastAPI dependency that only allows the given roles through.
+
+    This is a dependency *factory*, not a dependency itself: calling
+    require_role('admin', 'manager') returns role_dependency, which is what
+    actually gets passed to Depends() in a route signature, e.g.:
+
+        role_check: Annotated[dict, Depends(require_role('admin'))]
+
+    The factory pattern is needed because Depends() expects a callable with
+    no args of its own (aside from its own sub-dependencies) — this is how
+    we parameterize "which roles are allowed" per-route while still fitting
+    FastAPI's dependency injection shape.
+    """
     def role_dependency(user: user_dependency):
         if user.get('role') not in roles:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail='User does not have the required role.')
         return user
     return role_dependency
-

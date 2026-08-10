@@ -43,6 +43,8 @@ async def deactivate_user(db: db_dependency, user: user_dependency, user_id: Ann
     requested_user = db.query(Users).filter(Users.id == user_id).first()
     if requested_user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
+    # Block self-deactivation so an admin can't accidentally lock themselves
+    # out of the system with no other admin able to reverse it.
     if requested_user.id == user.get('id'):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Cannot deactivate your own account')
     requested_user.is_active = False
@@ -55,6 +57,8 @@ async def delete_user(db: db_dependency, user: user_dependency, user_id: Annotat
     requested_user = db.query(Users).filter(Users.id == user_id).first()
     if requested_user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='User not found')
+    # Same rationale as deactivate: prevent an admin from deleting their own
+    # account and potentially leaving the system with no admin left.
     if requested_user.id == user.get('id'):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Cannot delete your own account')
     db.delete(requested_user)
