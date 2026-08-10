@@ -2,10 +2,10 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(Path(__file__).resolve().parent.parent / '.env.test', override=True)
 
 from sqlalchemy import create_engine, text
-from app.db_base import Base
+from app.database import Base
 from sqlalchemy.orm import sessionmaker
 from app.main import app
 from app.models import Items, Users
